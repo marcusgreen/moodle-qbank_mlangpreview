@@ -24,7 +24,7 @@ namespace qbank_mlangpreview\local\hooks\output;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class before_standard_head_html_generation {
-  /**
+    /**
      * Allows plugins to add any elements to the page &lt;head&gt; html tag.
      *
      * @param \core\hook\output\before_standard_head_html_generation $hook
@@ -35,7 +35,6 @@ class before_standard_head_html_generation {
             $content = self::add_language_list();
             $hook->add_html($content);
         }
-
     }
 
     public static function add_language_list() {
@@ -49,7 +48,7 @@ class before_standard_head_html_generation {
         if($lang == '' && empty($tags)) {
             return '';
         }
-        // Add  user's current language to the list of tags for eash switch back.
+        // Add user's current language to the list of tags for easy switch back.
         $tags[] = $USER->lang;
 
         $langs = self::get_language_names($tags);
@@ -77,21 +76,22 @@ class before_standard_head_html_generation {
     }
 
     private static function extract_language_tags(string $text): array {
-	$patterns = [
-		'/\[\[lang\s+code=[\'"]([a-z]{2}(?:_[a-z]{2})?)[\'"]]\]/i',  // STACK format
-		'/\{mlang\s+([a-z]{2}(?:_[a-z]{2})?)\}/i',                   // MLang2 format
-		'/<span\s+(?:lang="([a-z]{2}(?:_[a-z]{2})?)"\s+class="multilang"|class="multilang"\s+lang="([a-z]{2}(?:_[a-z]{2})?)")>/i'  // Core Moodle format
-	];
+        $patterns = [
+            '/\[\[lang\s+code=[\'"]([a-z]{2}(?:_[a-z]{2})?)[\'"]]\]/i',  // STACK format
+            '/\{mlang\s+([a-z]{2}(?:_[a-z]{2})?)\}/i',                   // MLang2 format
+            '/<span\s+class="multilang"\s+lang="([a-z]{2}(?:_[a-z]{2})?)">/i',  // Core Moodle format variant 1
+            '/<span\s+lang="([a-z]{2}(?:_[a-z]{2})?)"\\s+class="multilang">/i'  // Core Moodle format variant 2
+        ];
         $languages = [];
         foreach ($patterns as $pattern) {
             if (preg_match_all($pattern, $text, $currentMatches)) {
                 $languages = array_merge($languages, $currentMatches[1]);
             }
         }
-
         // Remove duplicates and return unique language codes
         return array_unique($languages);
     }
+
     private static function get_language_names(array $langcodes): array {
         $languages = get_string_manager()->get_list_of_translations();
         $languagenames = [];
@@ -100,5 +100,4 @@ class before_standard_head_html_generation {
         }
         return $languagenames;
     }
-
 }
